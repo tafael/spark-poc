@@ -11,6 +11,7 @@
     <properties>
         <kotlin.version>1.2.60</kotlin.version>
         <spark.version>2.3.1</spark.version>
+        <postgresql.version>42.2.2</postgresql.version>
         <mysql.version>8.0.12</mysql.version>
     </properties>
 
@@ -31,6 +32,12 @@
             <groupId>org.apache.spark</groupId>
             <artifactId>spark-sql_2.11</artifactId>
             <version>${spark.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>${postgresql.version}</version>
         </dependency>
 
         <dependency>
