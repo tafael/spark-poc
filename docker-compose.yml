@@ -9,6 +9,8 @@ services:
       - POSTGRES_USER=test
       - POSTGRES_PASSWORD=test
       - MAX_CONNECTIONS=300
+    volumes:
+      - ./docker-compose-postgres.sql:/docker-entrypoint-initdb.d/setup.sql
   mysql:
     image: mysql
     command: mysqld --user=root --verbose
@@ -19,3 +21,5 @@ services:
       MYSQL_USER: "test"
       MYSQL_PASSWORD: "test"
       MYSQL_ROOT_PASSWORD: "test"
+    volumes:
+      - ./docker-compose-mysql.sql:/docker-entrypoint-initdb.d/setup.sql
