@@ -2,6 +2,7 @@ package br.com.zup.controller
 
 import br.com.zup.SparkPocConfig
 import br.com.zup.model.Result
+import br.com.zup.model.Sale
 import br.com.zup.model.User
 import org.junit.runner.RunWith
 import org.springframework.beans.factory.annotation.Autowired
@@ -55,6 +56,18 @@ class ControllerTest {
             actual = salesByUser
         )
 
+    }
+
+    @Test
+    fun `should find sales paged and filtered`() {
+        val filteredAndPagedSales = controller.findFilteredAndPagedSales(2, 2, "user-1")
+        assertEquals(
+            expected = listOf(
+                Sale(id = "sale-3", idUser = "user-1"),
+                Sale(id = "sale-4", idUser = "user-1")
+            ),
+            actual = filteredAndPagedSales
+        )
     }
 
 }

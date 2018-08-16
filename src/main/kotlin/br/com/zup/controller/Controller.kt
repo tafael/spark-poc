@@ -1,9 +1,12 @@
 package br.com.zup.controller
 
 import br.com.zup.model.Result
+import br.com.zup.model.Sale
 import br.com.zup.model.User
 import org.apache.spark.sql.Dataset
 import org.apache.spark.sql.Row
+import org.apache.spark.sql.expressions.Window
+import org.apache.spark.sql.functions
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.ResponseBody
@@ -48,6 +51,32 @@ open class Controller(
                     id = it.getString(2),
                     name = it.getString(3)
                 ) to it.getLong(1)
+            }
+    }
+
+    fun findFilteredAndPagedSales(page: Int, pageSize: Int, idUser: String): List<Sale> {
+        val filteredSalesDataSet = salesDataSet
+            .filter(
+                salesDataSet.col("id_user").equalTo(idUser)
+            )
+
+        val windowSpec = Window.partitionBy().orderBy(filteredSalesDataSet.col("id").asc())
+
+        return filteredSalesDataSet
+            .select(
+                filteredSalesDataSet.col("*"),
+                functions.row_number().over(windowSpec).alias("rowNumber")
+            )
+            .filter(
+                functions.col("rowNumber").gt((page - 1) * pageSize)
+            )
+            .orderBy(filteredSalesDataSet.col("id"))
+            .limit(pageSize)
+            .collectAsList().map {
+                Sale(
+                    id = it.getString(0),
+                    idUser = it.getString(1)
+                )
             }
     }
 
