@@ -3,6 +3,7 @@ package br.com.zup.controller
 import br.com.zup.model.Result
 import br.com.zup.model.Sale
 import br.com.zup.model.User
+import org.apache.spark.sql.Column
 import org.apache.spark.sql.Dataset
 import org.apache.spark.sql.Row
 import org.apache.spark.sql.expressions.Window
@@ -54,30 +55,29 @@ open class Controller(
             }
     }
 
-    fun findFilteredAndPagedSales(page: Int, pageSize: Int, idUser: String): List<Sale> {
-        val filteredSalesDataSet = salesDataSet
-            .filter(
-                salesDataSet.col("id_user").equalTo(idUser)
-            )
-
-        val windowSpec = Window.partitionBy().orderBy(filteredSalesDataSet.col("id").asc())
-
+    fun findFilteredAndPaginatedSales(page: Int, pageSize: Int, idUser: String): List<Sale> {
+        val filteredSalesDataSet = salesDataSet.filter(salesDataSet.col("id_user").equalTo(idUser))
         return filteredSalesDataSet
-            .select(
-                filteredSalesDataSet.col("*"),
-                functions.row_number().over(windowSpec).alias("rowNumber")
-            )
-            .filter(
-                functions.col("rowNumber").gt((page - 1) * pageSize)
-            )
-            .orderBy(filteredSalesDataSet.col("id"))
-            .limit(pageSize)
+            .paginated(page, pageSize, filteredSalesDataSet.col("id").asc())
             .collectAsList().map {
                 Sale(
                     id = it.getString(0),
                     idUser = it.getString(1)
                 )
             }
+
+    }
+
+    private fun Dataset<Row>.paginated(page: Int, pageSize: Int, vararg orderBy: Column): Dataset<Row> {
+        return select(
+            col("*"),
+            functions.row_number().over(Window.partitionBy().orderBy(*orderBy)).alias("rowNumber")
+        )
+            .filter(
+                functions.col("rowNumber").gt((page - 1) * pageSize)
+            )
+            .orderBy(*orderBy)
+            .limit(pageSize)
     }
 
 }

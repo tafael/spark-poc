@@ -60,7 +60,7 @@ class ControllerTest {
 
     @Test
     fun `should find sales paged and filtered`() {
-        val filteredAndPagedSales = controller.findFilteredAndPagedSales(2, 2, "user-1")
+        val filteredAndPagedSales = controller.findFilteredAndPaginatedSales(2, 2, "user-1")
         assertEquals(
             expected = listOf(
                 Sale(id = "sale-3", idUser = "user-1"),
