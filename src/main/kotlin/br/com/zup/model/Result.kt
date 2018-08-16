@@ -5,3 +5,13 @@ data class Result(
     val name: String,
     val idSale: String
 )
+
+data class User(
+    val id: String,
+    val name: String
+)
+
+data class Sale(
+    val id: String,
+    val idUser: String
+)

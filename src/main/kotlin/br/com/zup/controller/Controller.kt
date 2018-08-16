@@ -1,6 +1,7 @@
 package br.com.zup.controller
 
 import br.com.zup.model.Result
+import br.com.zup.model.User
 import org.apache.spark.sql.Dataset
 import org.apache.spark.sql.Row
 import org.springframework.beans.factory.annotation.Qualifier
@@ -11,23 +12,43 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 open class Controller(
     @Qualifier("mysqlDataSet")
-    private val mysqlDataSet: Dataset<Row>,
+    private val salesDataSet: Dataset<Row>,
     @Qualifier("postgresDataSet")
-    private val postgresDataSet: Dataset<Row>
+    private val usersDataSet: Dataset<Row>
 ) {
 
     @PostMapping("join-data-sets")
     @ResponseBody
     fun joinDataSets(): List<Result> {
-        return postgresDataSet.join(
-            mysqlDataSet, mysqlDataSet.col("id_user").equalTo(postgresDataSet.col("id"))
-        ).collectAsList().map {
-            Result(
-                it.getString(0),
-                it.getString(1),
-                it.getString(2)
+        return usersDataSet
+            .join(
+                salesDataSet,
+                salesDataSet.col("id_user").equalTo(usersDataSet.col("id"))
             )
-        }
+            .orderBy(salesDataSet.col("id"))
+            .collectAsList().map {
+                Result(
+                    it.getString(0),
+                    it.getString(1),
+                    it.getString(2)
+                )
+            }
+    }
+
+    fun countSalesByUser(): List<Pair<User, Long>> {
+        val groupedSalesDataSet = salesDataSet.groupBy(salesDataSet.col("id_user")).count()
+        return groupedSalesDataSet
+            .join(
+                usersDataSet,
+                usersDataSet.col("id").equalTo(groupedSalesDataSet.col("id_user"))
+            )
+            .orderBy(usersDataSet.col("name"))
+            .collectAsList().map {
+                User(
+                    id = it.getString(2),
+                    name = it.getString(3)
+                ) to it.getLong(1)
+            }
     }
 
 }
