@@ -29,6 +29,7 @@ open class MySqlDataSetConfig(
                 Properties().apply {
                     put("user", mysqlDataSetProperties.username)
                     put("password", mysqlDataSetProperties.password)
+                    put("driver", "com.mysql.cj.jdbc.Driver")
                 })
     }
 

@@ -29,6 +29,7 @@ open class PostgresDataSetConfig(
                 Properties().apply {
                     put("user", potgresDataSetProperties.username)
                     put("password", potgresDataSetProperties.password)
+                    put("driver", "org.postgresql.Driver")
                 })
     }
 
